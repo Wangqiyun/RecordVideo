@@ -31,9 +31,9 @@ public class MainActivity extends AppCompatActivity implements VideoRecordContro
         mAspectSurfaceView = (AspectSurfaceView) findViewById(R.id.aspect_surface_view);
 
         VideoRecordController.Builder builder = new VideoRecordController.Builder();
-        builder.setSurfaceView(mAspectSurfaceView.getSurfaceView());
-        mVideoRecordController = builder.builder();
-
+        mVideoRecordController = builder
+                .setSurfaceView(mAspectSurfaceView.getSurfaceView())
+                .builder();
         mVideoRecordController.setOnCameraPreviewSizeChangeListener(this);
     }
 
@@ -133,7 +133,8 @@ public class MainActivity extends AppCompatActivity implements VideoRecordContro
     }
 
     /**
-     * 设置显示的
+     * 设置画布渲染显示的方向
+     * @param orientation 方向数值(0-360)
      * */
     private void setDisplayOrientation(int orientation) {
         if(mVideoRecordController == null) {

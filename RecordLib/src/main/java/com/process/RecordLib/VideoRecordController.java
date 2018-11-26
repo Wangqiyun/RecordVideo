@@ -51,12 +51,6 @@ public class VideoRecordController implements
     private static final String HANDLER_THREAD_NAME = "handler_thread_name";
     /** 录制视频文件路径 */
     private static final String RECORD_FILE_PATH = "record_file_path";
-    /** 开始录制视频 */
-    private static final int START_RECORD_VIDEO_WHAT = 1;
-    /** 停止录制视频 */
-    private static final int STOP_RECORD_VIDEO_WHAT = 2;
-    /** 保存当前帧 */
-    private static final int SAVE_FRAME_FILE_WHAT = 3;
 
     private static final int VIDEO_WIDTH = 1280;  // dimensions for 720p video
     private static final int VIDEO_HEIGHT = 720;
@@ -290,19 +284,19 @@ public class VideoRecordController implements
     public void startRecordVideo(String filePath) {
         Bundle bundle = new Bundle();
         bundle.putString(RECORD_FILE_PATH, filePath);
-        sendMessageBundle(START_RECORD_VIDEO_WHAT, bundle);
+        sendMessageBundle(RecordVideoHandler.START_RECORD_VIDEO_WHAT, bundle);
     }
 
     @Override
     public void stopRecordVideo() {
-        sendMessageBundle(STOP_RECORD_VIDEO_WHAT, null);
+        sendMessageBundle(RecordVideoHandler.STOP_RECORD_VIDEO_WHAT, null);
     }
 
     @Override
     public void saveFrameFile(String filePath) {
         Bundle bundle = new Bundle();
         bundle.putString(RECORD_FILE_PATH, filePath);
-        sendMessageBundle(SAVE_FRAME_FILE_WHAT, bundle);
+        sendMessageBundle(RecordVideoHandler.SAVE_FRAME_FILE_WHAT, bundle);
     }
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
@@ -333,6 +327,16 @@ public class VideoRecordController implements
         if (mEglCore != null) {
             mEglCore.release();
             mEglCore = null;
+        }
+
+        if(mMainHandler != null) {
+            mMainHandler.removeMessages(MainHandler.MSG_FRAME_AVAILABLE);
+        }
+
+        if(mRecordVideoHandler != null) {
+            mRecordVideoHandler.removeMessages(RecordVideoHandler.SAVE_FRAME_FILE_WHAT);
+            mRecordVideoHandler.removeMessages(RecordVideoHandler.START_RECORD_VIDEO_WHAT);
+            mRecordVideoHandler.removeMessages(RecordVideoHandler.STOP_RECORD_VIDEO_WHAT);
         }
     }
 
@@ -426,6 +430,13 @@ public class VideoRecordController implements
      * 录制视频处理实体类
      * */
     private static class RecordVideoHandler extends android.os.Handler {
+        /** 开始录制视频 */
+        private static final int START_RECORD_VIDEO_WHAT = 1;
+        /** 停止录制视频 */
+        private static final int STOP_RECORD_VIDEO_WHAT = 2;
+        /** 保存当前帧 */
+        private static final int SAVE_FRAME_FILE_WHAT = 3;
+
         private WeakReference<VideoRecordController> mWeakRecordController;
 
         RecordVideoHandler(Looper looper, VideoRecordController controller) {
@@ -493,8 +504,9 @@ public class VideoRecordController implements
          * 设置表层View对象实体
          * @param surface 表层View对象实体
          * */
-        public void setSurfaceView(SurfaceView surface) {
+        public Builder setSurfaceView(SurfaceView surface) {
             this.mSurfaceView = surface;
+            return this;
         }
 
         /**
