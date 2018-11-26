@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        is-multidex="false"
+        jar="/Users/qiyunwang/Android/工具库/RecordVideo/RecordLib/build/intermediates/bundles/default/classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="26.0.3"
+        sha1="dd5cf6f0e3ef38047943a08751f7a040173b5ceb">
+        <dex dex="/Users/qiyunwang/Android/工具库/RecordVideo/app/build/intermediates/pre-dexed/debug/classes_9ef1ff08bf845955804909850db447626abb9f9c.jar" />
+    </item>
+
+</items>
