@@ -2,6 +2,7 @@ package com.process.record.widget;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.opengl.GLSurfaceView;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -16,7 +17,7 @@ import com.process.record.R;
 public class AspectSurfaceView extends LinearLayout {
     private static final String TAG = "AspectSurfaceView";
 
-    private SurfaceView mSurfaceView = null;
+    private GLSurfaceView mSurfaceView = null;
     private AspectFrameLayout mAspectFrameLayout = null;
 
     public AspectSurfaceView(Context context) {
@@ -48,7 +49,7 @@ public class AspectSurfaceView extends LinearLayout {
         LayoutInflater inflater = LayoutInflater.from(getContext());
         inflater.inflate(R.layout.record_video_layout, this, true);
 
-        mSurfaceView = (SurfaceView) findViewById(R.id.surface_view);
+        mSurfaceView = (GLSurfaceView) findViewById(R.id.surface_view);
         mAspectFrameLayout = (AspectFrameLayout) findViewById(R.id.aspect_frame_layout);
     }
 
@@ -56,7 +57,7 @@ public class AspectSurfaceView extends LinearLayout {
      * 得到surface view对象
      * @return 返回surface对象实体
      * */
-    public SurfaceView getSurfaceView() {
+    public GLSurfaceView getSurfaceView() {
         return mSurfaceView;
     }
 

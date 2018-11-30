@@ -3,25 +3,37 @@ package com.process.record;
 import android.content.Context;
 import android.hardware.Camera;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Display;
 import android.view.Surface;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.process.RecordLib.IVideoRecordController;
-import com.process.RecordLib.VideoRecordController;
+import com.process.RecordLib.RecordMovieController;
 import com.process.record.permission.PermissionHelper;
 import com.process.record.widget.AspectFrameLayout;
 import com.process.record.widget.AspectSurfaceView;
 
-public class MainActivity extends AppCompatActivity implements VideoRecordController.OnCameraPreviewSizeChangeListener {
+import java.io.File;
+
+public class MainActivity extends AppCompatActivity implements
+        View.OnClickListener,
+        IVideoRecordController.OnCameraPreviewSizeChangeListener {
     private static final String TAG = "MainActivity";
 
     private IVideoRecordController mVideoRecordController = null;
     private AspectSurfaceView mAspectSurfaceView = null;
+    private Button mStartRecord = null;
+//    private Button mStartPhoto = null;
+
+    /** 是否开始录制视频 */
+    private boolean isStartRecord = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,12 +41,21 @@ public class MainActivity extends AppCompatActivity implements VideoRecordContro
         setContentView(R.layout.activity_main);
 
         mAspectSurfaceView = (AspectSurfaceView) findViewById(R.id.aspect_surface_view);
+        mStartRecord = (Button) findViewById(R.id.start_record);
+//        mStartPhoto = (Button) findViewById(R.id.start_photo);
 
-        VideoRecordController.Builder builder = new VideoRecordController.Builder();
+        String path = getStoragePath() + File.separator + "demo" + File.separator + "demo.mp4";
+        File file = new File(path);
+
+        RecordMovieController.Builder builder = new RecordMovieController.Builder();
         mVideoRecordController = builder
                 .setSurfaceView(mAspectSurfaceView.getSurfaceView())
                 .builder();
         mVideoRecordController.setOnCameraPreviewSizeChangeListener(this);
+        mVideoRecordController.initialize(file);
+
+        mStartRecord.setOnClickListener(this);
+//        mStartPhoto.setOnClickListener(this);
     }
 
     @Override
@@ -44,7 +65,7 @@ public class MainActivity extends AppCompatActivity implements VideoRecordContro
         if(mVideoRecordController == null) {
             Log.w(TAG, "onResume() video record controller is null.");
         } else {
-            mVideoRecordController.startPreview();
+            mVideoRecordController.handleResume();
         }
     }
 
@@ -55,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements VideoRecordContro
         if(mVideoRecordController == null) {
             Log.w(TAG, "onPause() video record controller is null.");
         } else {
-            mVideoRecordController.release();
+            mVideoRecordController.handlePause();
         }
     }
 
@@ -67,6 +88,7 @@ public class MainActivity extends AppCompatActivity implements VideoRecordContro
             Log.w(TAG, "onDestroy() video record controller is null.");
         } else {
             mVideoRecordController.release();
+            mVideoRecordController.handleDestroy();
         }
     }
 
@@ -84,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements VideoRecordContro
             PermissionHelper.launchPermissionSettings(this);
             this.finish();
         } else {
-            mVideoRecordController.openCamera();
+            mVideoRecordController.openCamera(720, 1080);
         }
     }
 
@@ -111,6 +133,47 @@ public class MainActivity extends AppCompatActivity implements VideoRecordContro
         }
 
         setAspectRatio(ratio);
+    }
+
+    @Override
+    public void onClick(View v) {
+        int viewId = v.getId();
+        if(viewId == R.id.start_record) {
+            startRecordVideo();
+        }
+//        else if(viewId == R.id.start_photo) {
+//
+//        }
+    }
+
+    /**
+     * 开始录制视频
+     * */
+    private void startRecordVideo() {
+        isStartRecord = !isStartRecord;
+
+        if(mStartRecord == null) {
+            Log.w(TAG, "updateRecordTitle() start record is null.");
+        } else {
+            mStartRecord.setText(isStartRecord ? "停止拍摄" : "开始拍摄");
+        }
+
+        if(mVideoRecordController == null) {
+            Log.w(TAG, "updateRecordTitle() video record controller is null.");
+            return;
+        }
+
+        if(isStartRecord) {
+            String path = getStoragePath() + File.separator + "demo" + File.separator + "demo.mp4";
+            mVideoRecordController.startRecordVideo(path);
+        } else {
+            mVideoRecordController.stopRecordVideo();
+        }
+    }
+
+    private String getStoragePath() {
+        File file = Environment.getExternalStorageDirectory();
+        return file.getPath();
     }
 
     /**
